@@ -1,0 +1,8 @@
+.DS_Store
+*.sw?
+
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
+.rspec
