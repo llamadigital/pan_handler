@@ -1,13 +1,12 @@
 class PanHandler
   class Configuration
-    attr_accessor :meta_tag_prefix, :default_options, :root_url
+    attr_accessor :default_options, :root_url
     attr_writer :pandoc
 
     def initialize
       @default_options = {
         :from => 'html',
-        :to => 'odt',
-        :reference_odt => nil,
+        :to => 'odt'
       }
     end
 

@@ -23,4 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 2.8.0"
   s.add_development_dependency "guard"
   s.add_development_dependency "guard-rspec"
+  s.add_development_dependency "rack-test", ">= 0.5.6"
+  s.add_development_dependency "activesupport", ">= 3.0.8"
+
 end

@@ -29,15 +29,16 @@ class PanHandler
     args = [executable]
     args += @options.to_a.flatten.compact
 
-    args << "--output \"#{(path || '-')}\"" # Write to file or stdout
 
-    if @source.html?
-      args << '-' # Get HTML from stdin
-    else
+    args << '--output'
+    args << (path || '-') # Write to file or stdout
+
+    unless @source.html?
       args << @source.to_s
     end
 
     args.map {|arg| %Q{"#{arg.gsub('"', '\"')}"}}
+
   end
 
   def executable
@@ -50,7 +51,7 @@ class PanHandler
     end
   end
 
-  def to_odt(path=nil)
+  def to_odt(path)
     args = command(path)
     invoke = args.join(' ')
 
@@ -72,28 +73,28 @@ class PanHandler
 
   protected
 
-    def normalize_options(options)
-      normalized_options = {}
+  def normalize_options(options)
+    normalized_options = {}
 
-      options.each do |key, value|
-        next if !value
-        normalized_key = "--#{normalize_arg key}"
-        normalized_options[normalized_key] = normalize_value(value)
-      end
-      normalized_options
+    options.each do |key, value|
+      next if !value
+      normalized_key = "--#{normalize_arg key}"
+      normalized_options[normalized_key] = normalize_value(value)
     end
+    normalized_options
+  end
 
-    def normalize_arg(arg)
-      arg.to_s.downcase.gsub(/[^a-z0-9]/,'-')
-    end
+  def normalize_arg(arg)
+    arg.to_s.downcase.gsub(/[^a-z0-9]/,'-')
+  end
 
-    def normalize_value(value)
-      case value
-      when TrueClass
-        nil
-      else
-        value.to_s
-      end
+  def normalize_value(value)
+    case value
+    when TrueClass
+      nil
+    else
+      value.to_s
     end
+  end
 
 end
