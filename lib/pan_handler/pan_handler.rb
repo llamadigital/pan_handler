@@ -31,7 +31,6 @@ class PanHandler
     args = [executable]
     args += @options.to_a.flatten.compact
 
-
     args << '--output'
     args << (path || '-') # Write to file or stdout
 
@@ -40,7 +39,6 @@ class PanHandler
     end
 
     args.map {|arg| %Q{"#{arg.gsub('"', '\"')}"}}
-
   end
 
   def executable

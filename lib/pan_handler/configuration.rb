@@ -6,7 +6,8 @@ class PanHandler
     def initialize
       @default_options = {
         :from => 'html',
-        :to => 'odt'
+        :to => 'odt',
+        :standalone => true
       }
     end
 
