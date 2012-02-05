@@ -1,6 +1,6 @@
 class PanHandler
   class Configuration
-    attr_accessor :default_options, :root_url
+    attr_accessor :default_options, :root_path
     attr_writer :pandoc
 
     def initialize

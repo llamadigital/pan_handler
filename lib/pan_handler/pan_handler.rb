@@ -1,3 +1,5 @@
+require 'tempfile'
+
 class PanHandler
 
   class NoExecutableError < StandardError
@@ -51,7 +53,11 @@ class PanHandler
     end
   end
 
-  def to_odt(path)
+  def to_odt(path=nil)
+    if path.nil?
+      tempfile = Tempfile.new('panhandler')
+      path = tempfile.path
+    end
     args = command(path)
     invoke = args.join(' ')
 
@@ -61,8 +67,9 @@ class PanHandler
       odt.gets(nil)
     end
     result = File.read(path) if path
+    tempfile.unlink if tempfile
 
-    raise "command failed: #{invoke}" if result.to_s.strip.empty?
+    raise "command failed: #{invoke}" if result.empty?
     return result
   end
 

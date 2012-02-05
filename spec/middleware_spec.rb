@@ -15,6 +15,7 @@ def mock_app(options = {}, conditions = {})
   @app = builder.to_app
 end
 
+
 describe PanHandler::Middleware do
 
   describe "#call" do
@@ -215,22 +216,22 @@ describe PanHandler::Middleware do
     end
   end
 
-  describe "#translate_paths" do
+  describe "#translate_paths of absolute urls" do
     before do
       @odt = PanHandler::Middleware.new({})
       @env = { 'REQUEST_URI' => 'http://example.com/document.odt', 'rack.url_scheme' => 'http', 'HTTP_HOST' => 'example.com' }
     end
 
-    it "should correctly parse relative url with single quotes" do
-      @body = %{<html><head><link href='/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/test.png" /></body></html>}
+    it "should correctly parse with single quotes" do
+      @body = %{<html><head><link href='http://example.com/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="HTTP://example.com/test.png" /></body></html>}
       body = @odt.send :translate_paths, @body, @env
-      body.should == "<html><head><link href='http://example.com/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"http://example.com/test.png\" /></body></html>"
+      body.should == "<html><head><link media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' /></body></html>"
     end
 
-    it "should correctly parse relative url with double quotes" do
-      @body = %{<link href="/stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />}
+    it "should correctly parse with double quotes" do
+      @body = %{<link href="http://example.com/stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />}
       body = @odt.send :translate_paths, @body, @env
-      body.should == "<link href=\"http://example.com/stylesheets/application.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
+      body.should == "<link media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
     end
 
     it "should return the body even if there are no valid substitutions found" do
@@ -239,28 +240,51 @@ describe PanHandler::Middleware do
       body.should == "NO MATCH"
     end
   end
-  
-  describe "#translate_paths with root_url configuration" do
+
+   describe "#translate_paths of absolute files that do not exists" do
     before do
       @odt = PanHandler::Middleware.new({})
       @env = { 'REQUEST_URI' => 'http://example.com/document.odt', 'rack.url_scheme' => 'http', 'HTTP_HOST' => 'example.com' }
+    end
+
+    it "should correctly parse relative url with single quotes" do
+      @body = %{<html><head><link href='/does_not_exist.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/does_not_exist.png" /></body></html>}
+      body = @odt.send :translate_paths, @body, @env
+      body.should == "<html><head><link media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' /></body></html>"
+    end
+
+    it "should correctly parse relative url with double quotes" do
+      @body = %{<link href="/does_not_exist.css" media="screen" rel="stylesheet" type="text/css" />}
+      body = @odt.send :translate_paths, @body, @env
+      body.should == "<link media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
+    end
+   end
+  
+  describe "#translate_paths with root_path configuration" do
+    before do
+      @odt = PanHandler::Middleware.new({})
+      @env = { 'REQUEST_URI' => 'http://example.com/document.odt', 'rack.url_scheme' => 'http', 'HTTP_HOST' => 'example.com' }
+      @root = File.dirname(__FILE__)
       PanHandler.configure do |config|
-        config.root_url = "http://example.net/"
+        config.root_path = @root
       end
     end
 
-    it "should add the root_url" do
-      @body = %{<html><head><link href='/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/test.png" /></body></html>}
+    it "should add the root_path" do
+      @body = %{<html><head><link href='/fixtures/example.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/fixtures/test.jpg" /></body></html>}
       body = @odt.send :translate_paths, @body, @env
-      body.should == "<html><head><link href='http://example.net/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"http://example.net/test.png\" /></body></html>"
+      body.should == "<html><head><link href='#{@root}/fixtures/example.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"#{@root}/fixtures/test.jpg\" /></body></html>"
     end
     
     after do
       PanHandler.configure do |config|
-        config.root_url = nil
+        config.root_path = nil
       end
     end
   end
+
+  describe "#translate_paths with relative files"
+  describe "#translate_paths with query strings"
 
   it "should not get stuck rendering each request as odt" do
     mock_app

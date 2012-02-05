@@ -37,8 +37,26 @@ class PanHandler
     # Change relative paths to absolute
     def translate_paths(body, env)
       # Host with protocol
-      root = PanHandler.configuration.root_url || "#{env['rack.url_scheme']}://#{env['HTTP_HOST']}/"
-      body.gsub(/(href|src)=(['"])\/([^\"']*|[^"']*)['"]/, '\1=\2' + root + '\3\2')
+      root_path = PanHandler.configuration.root_path || ''
+      rel_path = env['REQUEST_URI'][/#{env['HTTP_HOST']}(.*)\//,1] || '/'
+      body.gsub(/(href|src)=(['"])([^\"']*|[^"']*)['"](\s?)/) do |match|
+        attr, delim, value, trailing = $1, $2, $3, $4
+        if value =~ /^http:\/\//i
+          # absolute url
+          ''
+        else
+          file_path = root_path
+          # relative path
+          file_path = File.join(file_path, rel_path) if value[0] != '/'
+          # remove a possible query string
+          file_path = File.join(file_path, value[/^(.*)\?/,1] || value)
+          if File.exists?(file_path)
+            "#{attr}=#{delim}#{file_path}#{delim}#{trailing || ''}"
+          else
+            ''
+          end
+        end
+      end
     end
 
     def rendering_odt?
