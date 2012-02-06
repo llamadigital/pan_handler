@@ -12,7 +12,7 @@ class PanHandler
     end
 
     def pandoc
-      @pandoc ||= (defined?(Bundler::GemfileError) ? `bundle exec which pandoc` : `which pandoc`).chomp
+      @pandoc ||= (defined?(Bundler::GemfileError) ? `bundle exec which pandoc-proxy` : `which pandoc-proxy`).chomp
     end
   end
 
@@ -28,3 +28,4 @@ class PanHandler
     yield(configuration)
   end
 end
+
