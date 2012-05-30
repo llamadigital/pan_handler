@@ -11,28 +11,44 @@ class PanHandler
     def call(env)
       @request    = Rack::Request.new(env)
       @render_odt = false
+      @render_docx = false
 
-      set_request_to_render_as_odt(env) if render_as_odt?
+      if render_as_odt?
+        set_request_to_render_as_odt(env) 
+        @options = @options.merge(:to => 'odt')
+      elsif render_as_docx?
+        set_request_to_render_as_docx(env) 
+        @options = @options.merge(:to => 'docx')
+      end
+
       status, headers, response = @app.call(env)
 
-      if rendering_odt? && headers['Content-Type'] =~ /text\/html|application\/xhtml\+xml/
+      if (rendering_odt? || rendering_docx?) && headers['Content-Type'] =~ /text\/html|application\/xhtml\+xml/
         body = response.respond_to?(:body) ? response.body : response.join
         body = body.join if body.is_a?(Array)
-        body = PanHandler.new(translate_paths(body, env), @options).to_odt
+        body = PanHandler.new(translate_paths(body, env), @options).to_data
         response = [body]
 
         # Do not cache ODTs
         headers.delete('ETag')
         headers.delete('Cache-Control')
 
-        headers["Content-Length"] = (body.respond_to?(:bytesize) ? body.bytesize : body.size).to_s
-        headers["Content-Type"]   = "application/vnd.oasis.opendocument.text"
+        headers['Content-Length'] = (body.respond_to?(:bytesize) ? body.bytesize : body.size).to_s
+        headers['Content-Type'] = content_type || headers['Content-Type']
       end
 
       [status, headers, response]
     end
 
     private
+
+    def content_type
+      if rendering_docx?
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      elsif rendering_odt?
+        'application/vnd.oasis.opendocument.text'
+      end
+    end
 
     # Change relative paths to absolute
     def translate_paths(body, env)
@@ -59,14 +75,26 @@ class PanHandler
       end
     end
 
+    def rendering_docx?
+      @render_docx
+    end
+
     def rendering_odt?
       @render_odt
     end
 
-    def render_as_odt?
-      request_path_is_odt = @request.path.match(%r{\.odt$})
+    def render_as_docx?
+      render_as?('docx')
+    end
 
-      if request_path_is_odt && @conditions[:only]
+    def render_as_odt?
+      render_as?('odt')
+    end
+
+    def render_as?(format)
+      request_path_is_format = @request.path.match(%r{\.#{format}$})
+
+      if request_path_is_format && @conditions[:only]
         rules = [@conditions[:only]].flatten
         rules.any? do |pattern|
           if pattern.is_a?(Regexp)
@@ -75,7 +103,7 @@ class PanHandler
             @request.path[0, pattern.length] == pattern
           end
         end
-      elsif request_path_is_odt && @conditions[:except]
+      elsif request_path_is_format && @conditions[:except]
         rules = [@conditions[:except]].flatten
         rules.map do |pattern|
           if pattern.is_a?(Regexp)
@@ -87,13 +115,22 @@ class PanHandler
 
         return true
       else
-        request_path_is_odt
+        request_path_is_format
       end
+    end
+
+    def set_request_to_render_as_docx(env)
+      @render_docx = true
+      set_request_to_render_as(env,'docx')
     end
 
     def set_request_to_render_as_odt(env)
       @render_odt = true
-      path = @request.path.sub(%r{\.odt$}, '')
+      set_request_to_render_as(env,'odt')
+    end
+
+    def set_request_to_render_as(env, format)
+      path = @request.path.sub(%r{\.#{format}$}, '')
       %w[PATH_INFO REQUEST_URI].each { |e| env[e] = path }
       env['HTTP_ACCEPT'] = concat(env['HTTP_ACCEPT'], Rack::Mime.mime_type('.html'))
       env["Rack-Middleware-PanHandler"] = "true"

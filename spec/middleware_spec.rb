@@ -30,13 +30,23 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'odt').to_data.bytesize
+              end
+              specify do
+                get 'http://www.example.org/public/test.docx'
+                last_response.headers["Content-Type"].should == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'docx').to_data.bytesize
               end
             end
 
             context "not matching" do
               specify do
                 get 'http://www.example.org/secret/test.odt'
+                last_response.headers["Content-Type"].should == "text/html"
+                last_response.body.should == "Hello world!"
+              end
+              specify do
+                get 'http://www.example.org/secret/test.docx'
                 last_response.headers["Content-Type"].should == "text/html"
                 last_response.body.should == "Hello world!"
               end
@@ -50,13 +60,23 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'odt').to_data.bytesize
+              end
+              specify do
+                get 'http://www.example.org/public/test.docx'
+                last_response.headers["Content-Type"].should == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'docx').to_data.bytesize
               end
             end
 
             context "not matching" do
               specify do
                 get 'http://www.example.org/secret/test.odt'
+                last_response.headers["Content-Type"].should == "text/html"
+                last_response.body.should == "Hello world!"
+              end
+              specify do
+                get 'http://www.example.org/secret/test.docx'
                 last_response.headers["Content-Type"].should == "text/html"
                 last_response.body.should == "Hello world!"
               end
@@ -72,13 +92,23 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'odt').to_data.bytesize
+              end
+              specify do
+                get 'http://www.example.org/public/test.docx'
+                last_response.headers["Content-Type"].should == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'docx').to_data.bytesize
               end
             end
 
             context "not matching" do
               specify do
                 get 'http://www.example.org/secret/test.odt'
+                last_response.headers["Content-Type"].should == "text/html"
+                last_response.body.should == "Hello world!"
+              end
+              specify do
+                get 'http://www.example.org/secret/test.docx'
                 last_response.headers["Content-Type"].should == "text/html"
                 last_response.body.should == "Hello world!"
               end
@@ -92,13 +122,23 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'odt').to_data.bytesize
+              end
+              specify do
+                get 'http://www.example.org/public/test.docx'
+                last_response.headers["Content-Type"].should == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                last_response.body.bytesize.should == PanHandler.new("Hello world!", :to => 'docx').to_data.bytesize
               end
             end
 
             context "not matching" do
               specify do
                 get 'http://www.example.org/secret/test.odt'
+                last_response.headers["Content-Type"].should == "text/html"
+                last_response.body.should == "Hello world!"
+              end
+              specify do
+                get 'http://www.example.org/secret/test.docx'
                 last_response.headers["Content-Type"].should == "text/html"
                 last_response.body.should == "Hello world!"
               end
@@ -118,7 +158,7 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_data.bytesize
               end
             end
 
@@ -138,7 +178,7 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_data.bytesize
               end
             end
 
@@ -160,7 +200,7 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_data.bytesize
               end
             end
 
@@ -180,7 +220,7 @@ describe PanHandler::Middleware do
               specify do
                 get 'http://www.example.org/public/test.odt'
                 last_response.headers["Content-Type"].should == "application/vnd.oasis.opendocument.text"
-                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_odt.bytesize
+                last_response.body.bytesize.should == PanHandler.new("Hello world!").to_data.bytesize
               end
             end
 
