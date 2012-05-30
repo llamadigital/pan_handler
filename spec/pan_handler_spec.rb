@@ -96,16 +96,27 @@ describe PanHandler do
     before { @tempfile = Tempfile.new('panhandler') }
     after { @tempfile.unlink if @tempfile }
 
-    [ PanHandler.new("<html><head></head><body>Hai!</body></html>"),
-      PanHandler.new('http://google.com'),
-      PanHandler.new(File.new(File.join('spec','fixtures','example.html')))
-    ].each do |panhandler|
+    [
+      '<html><head></head><body>Hai!</body></html>',
+      'http://google.com',
+      File.new(File.join('spec','fixtures','example.html'))
+    ].each do |source|
       it "should generate an ODT of HTML" do
+        panhandler = PanHandler.new(source, :to => 'odt')
         file = panhandler.to_file(@tempfile.path)
         file.should be_instance_of(File)
         File.exists?(file).should be_true
         file.size.should be > 0
         File.read(file)[0..1].should == "PK"
+      end
+
+      it "should generate a DOCX of HTML" do
+        panhandler = PanHandler.new(source, :to => 'docx')
+        file = panhandler.to_file(@tempfile.path)
+        file.should be_instance_of(File)
+        File.exists?(file).should be_true
+        file.size.should be > 0
+        # File.read(file)[0..1].should == "PK"
       end
     end
 

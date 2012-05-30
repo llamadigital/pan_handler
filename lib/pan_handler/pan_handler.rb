@@ -24,7 +24,9 @@ class PanHandler
     @options = PanHandler.configuration.default_options.merge(options)
     @options = normalize_options(@options)
 
-    raise NoExecutableError.new unless File.exists?(PanHandler.configuration.pandoc)
+    if PanHandler.configuration.pandoc.nil? || !File.exists?(PanHandler.configuration.pandoc)
+      raise NoExecutableError.new 
+    end
   end
 
   def command(path = nil)
@@ -52,6 +54,16 @@ class PanHandler
   end
 
   def to_odt(path=nil)
+    to_data(path)
+  end
+
+
+  def to_file(path)
+    self.to_data(path)
+    File.new(path)
+  end
+
+  def to_data(path=nil)
     if path.nil?
       tempfile = Tempfile.new('panhandler')
       path = tempfile.path
@@ -69,11 +81,6 @@ class PanHandler
 
     raise "command failed: #{invoke}" if result.empty?
     return result
-  end
-
-  def to_file(path)
-    self.to_odt(path)
-    File.new(path)
   end
 
   protected
