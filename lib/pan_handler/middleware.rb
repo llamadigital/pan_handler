@@ -26,6 +26,7 @@ class PanHandler
       if (rendering_odt? || rendering_docx?) && headers['Content-Type'] =~ /text\/html|application\/xhtml\+xml/
         body = response.respond_to?(:body) ? response.body : response.join
         body = body.join if body.is_a?(Array)
+        # Rails.logger.info('pan handler') if defined?(Rails)
         body = PanHandler.new(translate_paths(body, env), @options).to_data
         response = [body]
 
